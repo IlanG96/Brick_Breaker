@@ -10,10 +10,11 @@ import java.awt.event.KeyListener;
 public class Gameplay extends JPanel implements ActionListener, KeyListener {
     private  boolean start_game=false;
     private int score = 0;
-    private int totalBricks=21;
+    int level = 1;
+    private int totalBricks=20;
     private  Timer timer;
     private int speed_delay=2;
-
+    boolean levelpass=false;
     /**
      * player position
      */
@@ -27,13 +28,13 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener {
     /**
      * ball Direction
      */
-    private int ballXdir=-1;
-    private  int ballYdir=-2;
+    private double ballXdir=-1;
+    private  double ballYdir=-2;
 
     private MapGenerator gameMap;
 
     public Gameplay(){
-        gameMap= new MapGenerator(3,7);
+        gameMap= new MapGenerator(5,4);
         addKeyListener(this);
         setFocusable(true);
         setFocusTraversalKeysEnabled(false);
@@ -60,6 +61,11 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener {
         g.setFont(new Font("serif",Font.BOLD,25));
         g.drawString("Score: "+score,590,30);
 
+        //level
+        g.setColor(Color.red);
+        g.setFont(new Font("serif",Font.BOLD,25));
+        g.drawString("Level: "+level,10,30);
+
         //the paddle
         g.setColor(Color.green);
         g.fillRect(playerX,550,100,8);
@@ -75,9 +81,9 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener {
             g.setColor(Color.red);
             g.setFont(new Font("serif",Font.BOLD,30));
             g.drawString("Level Clear, Score: "+score,190,300);
-
+            levelpass=true;
             g.setFont(new Font("serif",Font.BOLD,20));
-            g.drawString("Press enter to Restart",230,350);
+            g.drawString("Press Space to Continue",230,350);
         }
 
         if (ballposY> 570){
@@ -123,8 +129,13 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener {
                              * change the ball direction when you hit a brick
                              */
                             if (ballposX+ 10<= brickRect.x || ballposX +1 >= brickRect.x + brickRect.width){
+                                ballXdir+=0.8;
                                 ballXdir= -ballXdir;
                             }else{
+                                if(ballYdir>=0)
+                                    ballYdir+=0.4;
+                                else
+                                    ballYdir-=0.4;
                                 ballYdir= -ballYdir;
                             }
                             break A;
@@ -180,6 +191,31 @@ public class Gameplay extends JPanel implements ActionListener, KeyListener {
                 repaint();
             }
         }
+        if(e.getKeyCode() == KeyEvent.VK_SPACE&&levelpass){
+            if (!start_game){
+                levelpass=false;
+                start_game=true;
+                ballposX=120;
+                ballposY=350;
+                ballXdir=-1;
+                ballYdir=-2;
+                playerX=310;
+                level++;
+                switch (level){
+                    case 1:
+                        totalBricks=20;
+                        gameMap= new MapGenerator(5,4);
+                    case 2:
+                        totalBricks=21;
+                        gameMap= new MapGenerator(3,7);
+                    case 3:
+                        totalBricks=24;
+                        gameMap= new MapGenerator(3,8);
+                }
+                repaint();
+            }
+        }
+
     }
     public void moveRight(){
         start_game=true;
